@@ -1,0 +1,394 @@
+mysql> create table empl(emp_no int primary key , sal int , loc varchar(20));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> insert into empl(emp_no,sal,loc) values(1,45000,'pune');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into empl(emp_no,sal,loc) values(2,35000,'mumbai');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into empl(emp_no,sal,loc) values(3,55000,'chennai');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into empl(emp_no,sal,loc) values(4,77000,'kolkata');
+Query OK, 1 row affected (0.00 sec)
+
+
+// 01 : Trigger ( After Delete )
+
+
+mysql> select * from empl;
++--------+-------+---------+
+| emp_no | sal   | loc     |
++--------+-------+---------+
+|      1 | 45000 | pune    |
+|      2 | 35000 | mumbai  |
+|      3 | 55000 | chennai |
+|      4 | 77000 | kolkata |
++--------+-------+---------+
+4 rows in set (0.00 sec)
+
+mysql> create table exit_empl(emp_no int primary key , date3 date);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter //
+mysql> create trigger after_delete
+    -> after delete
+    -> on empl
+    -> for each row
+    -> begin
+    -> insert into exit_empl values(old.emp_no , now());
+    -> end; //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delete from empl where emp_no = 3;
+    -> //
+Query OK, 1 row affected (0.01 sec)
+
+mysql> select * from empl;
+    -> //
++--------+-------+---------+
+| emp_no | sal   | loc     |
++--------+-------+---------+
+|      1 | 45000 | pune    |
+|      2 | 35000 | mumbai  |
+|      4 | 77000 | kolkata |
++--------+-------+---------+
+3 rows in set (0.00 sec)
+
+mysql> select * from exit_empl;
+    -> //
++--------+------------+
+| emp_no | date3      |
++--------+------------+
+|      3 | 2023-05-22 |
++--------+------------+
+1 row in set (0.00 sec)
+
+
+// 02 : Trigger (Before Insert)
+
+mysql> create table stud(id int primary key , name varchar(20) , sal int);
+    -> //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter ;
+mysql> create table dist(id int primary key , name varchar(20) , sal int);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create table fclass(id int primary key , name varchar(20) , sal int);
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter //
+mysql> create trigger before_insert
+    -> before insert
+    -> on stud
+    -> for each row
+    -> begin
+    -> if new.sal>60000 then
+    -> insert into dist values(new.id , new.name , new.sal);
+    -> end if;
+    -> if new.sal<=60000 then
+    -> insert into fclass values(new.id , new.name ,new.sal);
+    -> end if;
+    -> end; //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> insert into stud(id , name , sal) values(1 , 'A' , 70000);
+    -> //
+Query OK, 1 row affected (0.01 sec)
+mysql> insert into stud(id , name , sal) values(2 , 'B' , 25000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into stud(id , name , sal) values(3 , 'C' , 60000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from dist;
++----+------+-------+
+| id | name | sal   |
++----+------+-------+
+|  1 | A    | 70000 |
++----+------+-------+
+1 row in set (0.00 sec)
+
+mysql> select * from fclass;
++----+------+-------+
+| id | name | sal   |
++----+------+-------+
+|  2 | B    | 25000 |
+|  3 | C    | 60000 |
++----+------+-------+
+2 rows in set (0.00 sec)
+
+
+// 03 : Cursor without using handler
+
+
+mysql> delimiter //
+mysql> create procedure d2()
+    -> begin
+    -> declare i int;
+    -> declare salary int;
+    -> declare location varchar(20);
+    -> declare cur1 cursor for select emp_no,sal,loc from empl;
+    -> open cur1;
+    -> fetch cur1 into i,salary,location;
+    -> select i,salary,location;
+    -> close cur1;
+    -> end; //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call d2();
+    -> //
++------+--------+----------+
+| i    | salary | location |
++------+--------+----------+
+|    1 |  45000 | pune     |
++------+--------+----------+
+1 row in set (0.00 sec)
+
+Query OK, 0 rows affected (0.03 sec)
+
+
+// 04 : Cursor using handler
+
+mysql> delimiter //
+mysql> create procedure d3()
+    -> begin
+    -> declare done int default 0;
+    -> declare i int;
+    -> declare salary int;
+    -> declare location varchar(20);
+    -> declare cur2 cursor for select emp_no,sal,loc from empl;
+    -> declare continue handler for not found set done=1;
+    -> open cur2;
+    -> loop1:loop fetch cur2 into i,salary,location;
+    -> if done then leave loop1;
+    -> end if;
+    -> select i,salary,location;
+    -> end loop;
+    -> close cur2;
+    -> end;//
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> call d3();
+    -> //
++------+--------+----------+
+| i    | salary | location |
++------+--------+----------+
+|    1 |  45000 | pune     |
++------+--------+----------+
+1 row in set (0.00 sec)
+
++------+--------+----------+
+| i    | salary | location |
++------+--------+----------+
+|    2 |  35000 | mumbai   |
++------+--------+----------+
+1 row in set (0.03 sec)
+
++------+--------+----------+
+| i    | salary | location |
++------+--------+----------+
+|    4 |  77000 | kolkata  |
++------+--------+----------+
+1 row in set (0.09 sec)
+
+Query OK, 0 rows affected (0.14 sec)
+
+// 05 : Function for P , G , S
+
+
+mysql> delimiter //
+mysql> create function cl(level int)
+    -> returns varchar(20)
+    -> deterministic
+    -> begin
+    -> if(level >=10000) then
+    -> return 'Platinum';
+    -> else if(level >5000) and (level <10000)then
+    -> return 'Gold';
+    -> else
+    -> return 'Silver';
+    -> end if;
+    -> end if;
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select cl(6000);
+    -> //
++----------+
+| cl(6000) |
++----------+
+| Gold     |
++----------+
+1 row in set (0.00 sec)
+
+
+// 06 : Function for High and Low
+
+
+mysql> delimiter //
+mysql> create function hl1(no int)
+    -> returns varchar(20)
+    -> deterministic
+    -> begin
+    -> declare n int;
+    -> select sal into n from empl where emp_no = no;
+    -> if(n>50000)then
+    -> return 'High';
+    -> else
+    -> return 'Low';
+    -> end if;
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select hl1(1);
+    -> //
++--------+
+| hl1(1) |
++--------+
+| Low    |
++--------+
+1 row in set (0.00 sec)
+
+mysql> select hl1(2);
+    -> //
++--------+
+| hl1(2) |
++--------+
+| Low    |
++--------+
+1 row in set (0.00 sec)
+
+mysql> select hl1(3);
+    -> //
++--------+
+| hl1(3) |
++--------+
+| Low    |
++--------+
+1 row in set (0.00 sec)
+
+mysql> select hl1(4);
+    -> //
++--------+
+| hl1(4) |
++--------+
+| High   |
++--------+
+1 row in set (0.00 sec)
+
+
+// 07 : Count of employee
+
+mysql> delimiter //
+mysql> create function ct(emno int)
+    -> returns int
+    -> deterministic
+    -> begin
+    -> declare n int;
+    -> select count(emp_no) into n from empl;
+    -> return n;
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select ct(1);
+    -> //
++-------+
+| ct(1) |
++-------+
+|     3 |
++-------+
+1 row in set (0.00 sec)
+
+
+// 08 : Function for even and odd
+
+
+mysql> delimiter //
+mysql> create function e2(num int)
+    -> returns varchar(20)
+    -> deterministic
+    -> begin
+    -> if (num%2)=0 then
+    -> return 'Even';
+    -> else
+    -> return 'Odd';
+    -> end if;
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select e2(24);
+    -> //
++--------+
+| e2(24) |
++--------+
+| Even   |
++--------+
+1 row in set (0.00 sec)
+
+mysql> select e2(23);
+    -> //
++--------+
+| e2(23) |
++--------+
+| Odd    |
++--------+
+1 row in set (0.00 sec)
+
+
+// 09 : Largest among three numbers 
+
+
+mysql> delimiter //
+mysql> create function large(a int , b int , c int)
+    -> returns int
+    -> deterministic
+    -> begin
+    -> if(a>b) and (a>c) then
+    -> return a;
+    -> else if(b>c) and (b>a) then
+    -> return b;
+    -> else
+    -> return c;
+    -> end if;
+    -> end if;
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select large(5,6,1);
+    -> //
++--------------+
+| large(5,6,1) |
++--------------+
+|            6 |
++--------------+
+1 row in set (0.00 sec)
+
+
+// 10 : Add new employee into employee table using procedure
+
+
+mysql> delimiter //
+mysql> create procedure inst(empno int , salary int , location varchar(20))
+    -> begin
+    -> insert into empl values(empno,salary,location);
+    -> end; //
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> call inst(5,44000,'Pune');
+    -> //
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from empl;
+    -> //
++--------+-------+---------+
+| emp_no | sal   | loc     |
++--------+-------+---------+
+|      1 | 45000 | pune    |
+|      2 | 35000 | mumbai  |
+|      4 | 77000 | kolkata |
+|      5 | 44000 | Pune    |
++--------+-------+---------+
+4 rows in set (0.00 sec)

@@ -1,0 +1,636 @@
+// Mock Query Practice : 
+
+
+Microsoft Windows [Version 10.0.19045.2965]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\HP>mysql -u root -p
+Enter password: ***************
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 8.0.32 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use mock
+Database changed
+mysql> create table Department(dept_name varchar(20) primary key, building int, budget int);
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> desc Department;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| dept_name | varchar(20) | NO   | PRI | NULL    |       |
+| building  | int         | YES  |     | NULL    |       |
+| budget    | int         | YES  |     | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+3 rows in set (0.01 sec)
+
+mysql> create table instructor(inst_id int primary key, name varchar(20), salary int,dept_name varchar(20), foreign key(dept_name) references Department(dept_name));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> desc instructor;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| inst_id   | int         | NO   | PRI | NULL    |       |
+| name      | varchar(20) | YES  |     | NULL    |       |
+| salary    | int         | YES  |     | NULL    |       |
+| dept_name | varchar(20) | YES  | MUL | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql> create table Course(course_id varchar(20) primary key , title varchar(20), credits int, dept_name varchar(20), foreign key (dept_name) references department(dept_name));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> desc Course;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| course_id | varchar(20) | NO   | PRI | NULL    |       |
+| title     | varchar(20) | YES  |     | NULL    |       |
+| credits   | int         | YES  |     | NULL    |       |
+| dept_name | varchar(20) | YES  | MUL | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+mysql> create table teaches(course_id varchar(20), foreign key(course_id) references course(course_id), inst_id int , foreign key(inst_id) references instructor(inst_id), primary key(course_id, inst_id));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> desc teaches;
++-----------+-------------+------+-----+---------+-------+
+| Field     | Type        | Null | Key | Default | Extra |
++-----------+-------------+------+-----+---------+-------+
+| course_id | varchar(20) | NO   | PRI | NULL    |       |
+| inst_id   | int         | NO   | PRI | NULL    |       |
++-----------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('m1', 'Intro_to_Maths',4,'Comp');
+ERROR 1452 (23000): Cannot add or update a child row: a foreign key constraint fails (`mock`.`course`, CONSTRAINT `course_ibfk_1` FOREIGN KEY (`dept_name`) REFERENCES `department` (`dept_name`))
+mysql> insert into Department(dept_name, building , budget) values ('ITechnology',1,10000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Department(dept_name, building , budget) values ('Comp',2,30000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Department(dept_name, building , budget) values ('Mech',3,50000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Department(dept_name, building , budget) values ('ECY',4,10000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Department(dept_name, building , budget) values ('Biology',5,20000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Department(dept_name, building , budget) values ('Music',6,100000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(11,'eieio',80000,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(12,'ABC',90000,'Biology');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(13,'PQR',60000,'Biology');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(14,'XYZ',50000,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(15,'LMN',90000,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(16,'LMNOP',100000,'ITechnology');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Instructor(inst_id, name, salary , dept_name) values(17,'ABCDEF',200000,'Comp');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from Department;
++-------------+----------+--------+
+| dept_name   | building | budget |
++-------------+----------+--------+
+| Biology     |        5 |  20000 |
+| Comp        |        2 |  30000 |
+| ECY         |        4 |  10000 |
+| ITechnology |        1 |  10000 |
+| Mech        |        3 |  50000 |
+| Music       |        6 | 100000 |
++-------------+----------+--------+
+6 rows in set (0.00 sec)
+
+mysql> select * from instructor;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      11 | eieio  |  80000 | Music       |
+|      12 | ABC    |  90000 | Biology     |
+|      13 | PQR    |  60000 | Biology     |
+|      14 | XYZ    |  50000 | Music       |
+|      15 | LMN    |  90000 | Music       |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      17 | ABCDEF | 200000 | Comp        |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('m1', 'Intro_to_Maths',4,'Comp');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('m2', 'Basic_Maths',5,'ITechnology');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('m3', 'Adv_Maths',4,'Biology');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('phy_1', 'Intro_to_Phy',3,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('mus_1', 'Intro_to_Mus',4,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into course(course_id, title, credits, dept_name)values('mus_2', 'Adv_Mus',5,'Music');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into teaches(course_id,inst_id)values('m1',11);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into teaches(course_id,inst_id)values('m1',17);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into teaches(course_id,inst_id)values('mus_1',11);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into teaches(course_id,inst_id)values('m3',12);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into teaches(course_id,inst_id)values('mus_2',14);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from course;
++-----------+----------------+---------+-------------+
+| course_id | title          | credits | dept_name   |
++-----------+----------------+---------+-------------+
+| m1        | Intro_to_Maths |       4 | Comp        |
+| m2        | Basic_Maths    |       5 | ITechnology |
+| m3        | Adv_Maths      |       4 | Biology     |
+| mus_1     | Intro_to_Mus   |       4 | Music       |
+| mus_2     | Adv_Mus        |       5 | Music       |
+| phy_1     | Intro_to_Phy   |       3 | Music       |
++-----------+----------------+---------+-------------+
+6 rows in set (0.00 sec)
+
+mysql> select * from teaches;
++-----------+---------+
+| course_id | inst_id |
++-----------+---------+
+| m1        |      11 |
+| mus_1     |      11 |
+| m3        |      12 |
+| mus_2     |      14 |
+| m1        |      17 |
++-----------+---------+
+5 rows in set (0.00 sec)
+
+mysql> select * from Department;
++-------------+----------+--------+
+| dept_name   | building | budget |
++-------------+----------+--------+
+| Biology     |        5 |  20000 |
+| Comp        |        2 |  30000 |
+| ECY         |        4 |  10000 |
+| ITechnology |        1 |  10000 |
+| Mech        |        3 |  50000 |
+| Music       |        6 | 100000 |
++-------------+----------+--------+
+6 rows in set (0.00 sec)
+
+mysql> select * from instructor;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      11 | eieio  |  80000 | Music       |
+|      12 | ABC    |  90000 | Biology     |
+|      13 | PQR    |  60000 | Biology     |
+|      14 | XYZ    |  50000 | Music       |
+|      15 | LMN    |  90000 | Music       |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      17 | ABCDEF | 200000 | Comp        |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> create view v1 as select instructor.name , instructor.inst_id , teaches.course_id from instructor , teaches where instructor.inst_id=teaches.inst_id;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from v1;
++--------+---------+-----------+
+| name   | inst_id | course_id |
++--------+---------+-----------+
+| eieio  |      11 | m1        |
+| eieio  |      11 | mus_1     |
+| ABC    |      12 | m3        |
+| XYZ    |      14 | mus_2     |
+| ABCDEF |      17 | m1        |
++--------+---------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> select dept_name from Department where dept_name like '%i%';
++-------------+
+| dept_name   |
++-------------+
+| Biology     |
+| ITechnology |
+| Music       |
++-------------+
+3 rows in set (0.00 sec)
+
+mysql> select title , dept_name from course where dept_name like '%y';
++-------------+-------------+
+| title       | dept_name   |
++-------------+-------------+
+| Basic_Maths | ITechnology |
+| Adv_Maths   | Biology     |
++-------------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select name from instructor where salary > 70000 and dept_name = 'Comp';
++--------+
+| name   |
++--------+
+| ABCDEF |
++--------+
+1 row in set (0.00 sec)
+
+mysql> create view v2 as select Department.dept_name , name , salary from Department , instructor where Department.dept_name = instructor.dept_name;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from v2;
++-------------+--------+--------+
+| dept_name   | name   | salary |
++-------------+--------+--------+
+| Biology     | ABC    |  90000 |
+| Biology     | PQR    |  60000 |
+| Comp        | ABCDEF | 200000 |
+| ITechnology | LMNOP  | 100000 |
+| Music       | eieio  |  80000 |
+| Music       | XYZ    |  50000 |
+| Music       | LMN    |  90000 |
++-------------+--------+--------+
+7 rows in set (0.00 sec)
+
+mysql> select name from instructor where name like '_____';
++-------+
+| name  |
++-------+
+| eieio |
+| LMNOP |
++-------+
+2 rows in set (0.00 sec)
+
+mysql> create view v3 as select instructor.name , course.course_id from instructor , course where instrcutor.dept_name=course.dept_name and dept_name='ITechnology';
+ERROR 1054 (42S22): Unknown column 'instrcutor.dept_name' in 'where clause'
+mysql> create view v3 as select instructor.name , course.course_id from instructor , course where instructor.dept_name=course.dept_name and dept_name='ITechnology';
+ERROR 1052 (23000): Column 'dept_name' in where clause is ambiguous
+mysql> create view v3 as select instructor.name , course.course_id from instructor , course where instructor.dept_name=course.dept_name and instructor.dept_name='ITechnology';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> select * from v3;
++-------+-----------+
+| name  | course_id |
++-------+-----------+
+| LMNOP | m2        |
++-------+-----------+
+1 row in set (0.00 sec)
+
+mysql> select name from instructor where salary>some(select salary from instructor where dept_name='Biology');
++--------+
+| name   |
++--------+
+| eieio  |
+| ABC    |
+| LMN    |
+| LMNOP  |
+| ABCDEF |
++--------+
+5 rows in set (0.00 sec)
+
+mysql> select title , dept_name from course where dept_name like '%y';
++-------------+-------------+
+| title       | dept_name   |
++-------------+-------------+
+| Basic_Maths | ITechnology |
+| Adv_Maths   | Biology     |
++-------------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> select title , dept_name from course where dept_name = 'Biology';
++-----------+-----------+
+| title     | dept_name |
++-----------+-----------+
+| Adv_Maths | Biology   |
++-----------+-----------+
+1 row in set (0.00 sec)
+
+mysql> select avg(salary) from instructor where dept_name='Music';
++-------------+
+| avg(salary) |
++-------------+
+|  73333.3333 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> select avg(salary) from instructor group by dept_name;
++-------------+
+| avg(salary) |
++-------------+
+|  75000.0000 |
+| 200000.0000 |
+| 100000.0000 |
+|  73333.3333 |
++-------------+
+4 rows in set (0.00 sec)
+
+mysql> select dept_name , avg(salary) from instructor group by dept_name having salary>40000;
+ERROR 1054 (42S22): Unknown column 'salary' in 'having clause'
+mysql> select dept_name , avg(salary) from instructor group by dept_name where salary>40000;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'where salary>40000' at line 1
+mysql> select dept_name , avg(salary) from instructor where salary > 40000 group by dept_name;
++-------------+-------------+
+| dept_name   | avg(salary) |
++-------------+-------------+
+| Biology     |  75000.0000 |
+| Comp        | 200000.0000 |
+| ITechnology | 100000.0000 |
+| Music       |  73333.3333 |
++-------------+-------------+
+4 rows in set (0.00 sec)
+
+mysql> select name from instructor where salary > 50000 and dept_name='Music';
++-------+
+| name  |
++-------+
+| eieio |
+| LMN   |
++-------+
+2 rows in set (0.00 sec)
+
+mysql> select * from instructor;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      11 | eieio  |  80000 | Music       |
+|      12 | ABC    |  90000 | Biology     |
+|      13 | PQR    |  60000 | Biology     |
+|      14 | XYZ    |  50000 | Music       |
+|      15 | LMN    |  90000 | Music       |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      17 | ABCDEF | 200000 | Comp        |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> select * from teaches;
++-----------+---------+
+| course_id | inst_id |
++-----------+---------+
+| m1        |      11 |
+| mus_1     |      11 |
+| m3        |      12 |
+| mus_2     |      14 |
+| m1        |      17 |
++-----------+---------+
+5 rows in set (0.00 sec)
+
+mysql> select * from course;
++-----------+----------------+---------+-------------+
+| course_id | title          | credits | dept_name   |
++-----------+----------------+---------+-------------+
+| m1        | Intro_to_Maths |       4 | Comp        |
+| m2        | Basic_Maths    |       5 | ITechnology |
+| m3        | Adv_Maths      |       4 | Biology     |
+| mus_1     | Intro_to_Mus   |       4 | Music       |
+| mus_2     | Adv_Mus        |       5 | Music       |
+| phy_1     | Intro_to_Phy   |       3 | Music       |
++-----------+----------------+---------+-------------+
+6 rows in set (0.00 sec)
+
+mysql> select instructor.inst_id , name ,salary , course_id from instructor , teaches where instructor.inst_id = teaches.inst_id;
++---------+--------+--------+-----------+
+| inst_id | name   | salary | course_id |
++---------+--------+--------+-----------+
+|      11 | eieio  |  80000 | m1        |
+|      11 | eieio  |  80000 | mus_1     |
+|      12 | ABC    |  90000 | m3        |
+|      14 | XYZ    |  50000 | mus_2     |
+|      17 | ABCDEF | 200000 | m1        |
++---------+--------+--------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> select instrctor.name , course.course_id from instructor , teaches where instructor.inst_id=teaches.inst_id;
+ERROR 1054 (42S22): Unknown column 'instrctor.name' in 'field list'
+mysql> select instructor.name , course.course_id from instructor , teaches where instructor.inst_id=teaches.inst_id;
+ERROR 1054 (42S22): Unknown column 'course.course_id' in 'field list'
+mysql> select instructor.name , course_id from instructor , teaches where instructor.inst_id=teaches.inst_id;
++--------+-----------+
+| name   | course_id |
++--------+-----------+
+| eieio  | m1        |
+| eieio  | mus_1     |
+| ABC    | m3        |
+| XYZ    | mus_2     |
+| ABCDEF | m1        |
++--------+-----------+
+5 rows in set (0.00 sec)
+
+mysql> select * from instructor order by name desc;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      14 | XYZ    |  50000 | Music       |
+|      13 | PQR    |  60000 | Biology     |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      15 | LMN    |  90000 | Music       |
+|      11 | eieio  |  80000 | Music       |
+|      17 | ABCDEF | 200000 | Comp        |
+|      12 | ABC    |  90000 | Biology     |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> select * from instructor order by inst_id desc;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      17 | ABCDEF | 200000 | Comp        |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      15 | LMN    |  90000 | Music       |
+|      14 | XYZ    |  50000 | Music       |
+|      13 | PQR    |  60000 | Biology     |
+|      12 | ABC    |  90000 | Biology     |
+|      11 | eieio  |  80000 | Music       |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> update instructor set salary = salary + 10000 where salary < 40000;
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+
+mysql> select * from instructor;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      11 | eieio  |  80000 | Music       |
+|      12 | ABC    |  90000 | Biology     |
+|      13 | PQR    |  60000 | Biology     |
+|      14 | XYZ    |  50000 | Music       |
+|      15 | LMN    |  90000 | Music       |
+|      16 | LMNOP  | 100000 | ITechnology |
+|      17 | ABCDEF | 200000 | Comp        |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> update instructor set salary = salary + 10000 where salary < 40000 else salary = salary + 20000;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'else salary = salary + 20000' at line 1
+mysql> update instructor set salary = case
+    -> when salary<40000
+    -> then
+    -> salary+10000
+    -> else
+    -> salary+20000
+    -> end
+    -> ;
+Query OK, 7 rows affected (0.00 sec)
+Rows matched: 7  Changed: 7  Warnings: 0
+
+mysql> select * from instructor;
++---------+--------+--------+-------------+
+| inst_id | name   | salary | dept_name   |
++---------+--------+--------+-------------+
+|      11 | eieio  | 100000 | Music       |
+|      12 | ABC    | 110000 | Biology     |
+|      13 | PQR    |  80000 | Biology     |
+|      14 | XYZ    |  70000 | Music       |
+|      15 | LMN    | 110000 | Music       |
+|      16 | LMNOP  | 120000 | ITechnology |
+|      17 | ABCDEF | 220000 | Comp        |
++---------+--------+--------+-------------+
+7 rows in set (0.00 sec)
+
+mysql> select dept_name , count(name) from instructor group by dept_name;
++-------------+-------------+
+| dept_name   | count(name) |
++-------------+-------------+
+| Biology     |           2 |
+| Comp        |           1 |
+| ITechnology |           1 |
+| Music       |           3 |
++-------------+-------------+
+4 rows in set (0.00 sec)
+
+mysql> create table Student(RollNo int primary key, Name varchar(20), Address varchar(20));
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> create table Subject(Subcode int , Subname varchar(20));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> create table Marks(RollNo int, foreign key(RollNo) references Student(RollNO), Subcode int , foreign key(Subcode) references Subject(Subcode), Marks int);
+ERROR 1822 (HY000): Failed to add the foreign key constraint. Missing index for constraint 'marks_ibfk_2' in the referenced table 'subject'
+mysql> alter table Subject add primary key(Subcode);
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> create table Marks(RollNo int, foreign key(RollNo) references Student(RollNO), Subcode int , foreign key(Subcode) references Subject(Subcode), Marks int);
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> select * from Student;
+Empty set (0.00 sec)
+
+mysql> insert into Student(RollNo, Name, Address)values(1,'Tan','Pune');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Student(RollNo, Name, Address)values(2,'May','Punit');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Subject(Subcode,SubName)values(99, 'DBMS');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Subject(Subcode,SubName)values(98, 'OS');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Subject(Subcode,SubName)values(97, 'TOC');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(1,'99','20');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(2,'99','80');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(1,'98','80');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(1,'97','70')
+    -> ;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(2,'98','50');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into Marks(RollNo, Subcode, Marks)values(2,'97','60');
+Query OK, 1 row affected (0.00 sec)
+
+mysql> select * from Student;
++--------+------+---------+
+| RollNo | Name | Address |
++--------+------+---------+
+|      1 | Tan  | Pune    |
+|      2 | May  | Punit   |
++--------+------+---------+
+2 rows in set (0.00 sec)
+
+mysql> select * from Subject;
++---------+---------+
+| Subcode | Subname |
++---------+---------+
+|      97 | TOC     |
+|      98 | OS      |
+|      99 | DBMS    |
++---------+---------+
+3 rows in set (0.00 sec)
+
+mysql> select * from Marks;
++--------+---------+-------+
+| RollNo | Subcode | Marks |
++--------+---------+-------+
+|      1 |      99 |    20 |
+|      2 |      99 |    80 |
+|      1 |      98 |    80 |
+|      1 |      97 |    70 |
+|      2 |      98 |    50 |
+|      2 |      97 |    60 |
++--------+---------+-------+
+6 rows in set (0.00 sec)
+
+mysql> select Name , avg(Marks) from Student , Marks where Student.RollNo=Marks.RollNo group by Name;
++------+------------+
+| Name | avg(Marks) |
++------+------------+
+| Tan  |    56.6667 |
+| May  |    63.3333 |
++------+------------+
+2 rows in set (0.00 sec)
+
+mysql> select count(Name) from Student , Marks where Student.RollNo = Marks.RollNo and SubCode = 98 and Marks>60;
++-------------+
+| count(Name) |
++-------------+
+|           1 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql>
